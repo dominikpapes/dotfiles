@@ -1,0 +1,18 @@
+[Desktop Entry]
+
+Name=TIDAL Hi-Fi
+Exec=/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=com.mastermindzh.tidal-hifi com.mastermindzh.tidal-hifi
+Terminal=false
+Type=Application
+Icon=/home/dominik/.local/share/applications/tidal_square_logo.png
+StartupWMClass=tidal-hifi
+Encoding=UTF-8
+GenericName=TIDAL Hi-Fi
+Comment=Tidal on Electron with widevine(hifi) support
+StartupNotify=true
+Categories=AudioVideo;
+X-PulseAudio-Properties=media.role=music
+MimeType=x-scheme-handler/tidal;
+X-Desktop-File-Install-Version=0.28
+X-Flatpak-RenamedFrom=tidal-hifi.desktop;
+X-Flatpak=com.mastermindzh.tidal-hifi
