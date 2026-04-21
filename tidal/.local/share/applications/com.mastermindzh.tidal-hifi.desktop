@@ -4,7 +4,7 @@ Name=TIDAL Hi-Fi
 Exec=/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=com.mastermindzh.tidal-hifi com.mastermindzh.tidal-hifi
 Terminal=false
 Type=Application
-Icon=~/.local/share/icons/tidal.png
+Icon=tidal
 StartupWMClass=tidal-hifi
 Encoding=UTF-8
 GenericName=TIDAL Hi-Fi
