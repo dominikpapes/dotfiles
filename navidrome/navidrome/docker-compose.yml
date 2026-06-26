@@ -11,7 +11,7 @@ services:
       ND_LASTFM_ENABLED: "true"
       ND_LASTFM_APIKEY: "${ND_LASTFM_APIKEY}"
       ND_LASTFM_SECRET: "${ND_LASTFM_SECRET}"
-      ND_COVERARTPRIORITY: "album.*, cover.*"
+      ND_COVERARTPRIORITY: "folder.*, cover.*"
     volumes:
       - "./data:/data:z"
       - "/home/dominik/Music:/music/anduril:ro,z"

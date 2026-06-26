@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Default values
+TARGET_DIR="${1:-.}"
+
+if [[ ! -d "$TARGET_DIR" ]]; then
+    echo "Error: '$TARGET_DIR' is not a valid directory."
+    exit 1
+fi
+
+# Check for dependencies
+for cmd in jq curl ffprobe metaflac; do
+    if ! command -v $cmd &> /dev/null; then
+        echo "Error: '$cmd' is not installed."
+        exit 1
+    fi
+done
+
+echo "Scanning: $(realpath "$TARGET_DIR")"
+echo "Note: Files with existing 'LYRICS' tags will be skipped."
+
+find "$TARGET_DIR" -type f -name "*.flac" | while read -r file; do
+    echo "--------------------------------------------"
+    echo "Processing: $file"
+
+    # Skip if lyrics already exist
+    existing_lyrics=$(metaflac --show-tag=LYRICS "$file" 2>/dev/null)
+    if [[ -n "$existing_lyrics" ]]; then
+        echo "Skipping: Lyrics already exist."
+        continue
+    fi
+
+    # Extract metadata
+    tags=$(metaflac --export-tags-to=- "$file")
+    artist=$(echo "$tags" | grep -i "^ARTIST=" | head -n 1 | sed 's/^[^=]*=//; s/^[[:space:]]*//; s/[[:space:]]*$//')
+    title=$(echo "$tags" | grep -i "^TITLE=" | head -n 1 | sed 's/^[^=]*=//; s/^[[:space:]]*//; s/[[:space:]]*$//')
+    album=$(echo "$tags" | grep -i "^ALBUM=" | head -n 1 | sed 's/^[^=]*=//; s/^[[:space:]]*//; s/[[:space:]]*$//')
+    duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$file")
+
+    if [[ -z "$artist" || -z "$title" ]]; then
+        echo "Skipping: Could not find ARTIST or TITLE tags."
+        continue
+    fi
+
+    # Query LRCLIB API
+    response=$(curl -s -G "https://lrclib.net/api/get" \
+        --data-urlencode "artist_name=$artist" \
+        --data-urlencode "track_name=$title" \
+        --data-urlencode "album_name=$album" \
+        --data-urlencode "duration=$duration")
+
+    # Extract lyrics
+    lyrics=$(echo "$response" | jq -r '.plainLyrics // empty')
+
+    if [[ -n "$lyrics" && "$lyrics" != "null" ]]; then
+        echo "Found plain lyrics. Formatting and Embedding..."
+        
+        # --- APPLY FORMATTING ---
+        # Replaces double newlines (or lines with only spaces) with a newline + Zero Width Space + newline
+        formatted_lyrics=$(echo "$lyrics" | sed -E 'N;s/\n[[:space:]]*\n/\n\u200b\n/g')
+        
+        tmp_lyrics=$(mktemp)
+        echo "$formatted_lyrics" > "$tmp_lyrics"
+        metaflac --set-tag-from-file="LYRICS=$tmp_lyrics" "$file"
+        rm "$tmp_lyrics"
+        
+        echo "Success!"
+    else
+        echo "No plain lyrics found for: $title"
+    fi
+done
+
+echo "--------------------------------------------"
+echo "Done!"
