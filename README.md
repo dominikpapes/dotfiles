@@ -1,5 +1,5 @@
 # Personal Dotfiles
 
-Repo must be located inside '~' directory.  
+Clone repo in `home/user/`
 Usage: `stow [package-names]`
 
