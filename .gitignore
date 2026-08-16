@@ -1,2 +1,4 @@
 navidrome/navidrome/data/
 navidrome/navidrome/.env
+jellyfin/jellyfin/cache/
+jellyfin/jellyfin/config/
