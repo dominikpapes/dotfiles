@@ -11,6 +11,8 @@ services:
       ND_LASTFM_ENABLED: "true"
       ND_LASTFM_APIKEY: "${ND_LASTFM_APIKEY}"
       ND_LASTFM_SECRET: "${ND_LASTFM_SECRET}"
+      ND_AGENTS: "lastfm"
+      ND_ARTISTARTPRIORITY: "external"
       ND_COVERARTPRIORITY: "folder.*, cover.*"
     volumes:
       - "./data:/data:z"
